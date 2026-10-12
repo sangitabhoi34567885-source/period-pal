@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PeriodPal — Period Cycle Tracker</title>
+  <meta name="description" content="A simple and private way to record your period dates and learn about your cycle.">
+  <link rel="stylesheet" href="style.css">
+  <!-- "defer" means: load the script now, but run it only after the page is built -->
+  <script src="cycle-calculation.js" defer></script>
+  <script src="storage.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <!-- Lets keyboard users jump past the menu -->
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- ============ A. NAVIGATION BAR ============ -->
+  <header class="site-header">
+    <div class="container header-inner">
+
+      <a class="logo" href="#home" aria-label="PeriodPal, back to top">
+        <!-- Simple calendar-with-flower icon (decorative, so hidden from screen readers) -->
+        <svg class="logo-icon" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+          <rect x="3" y="6" width="34" height="31" rx="9" fill="#59364F"/>
+          <rect x="11" y="2" width="4" height="9" rx="2" fill="#F6B9CF"/>
+          <rect x="25" y="2" width="4" height="9" rx="2" fill="#F6B9CF"/>
+          <g transform="translate(20 24)" fill="#FCE7EF">
+            <ellipse cx="0" cy="-6" rx="4" ry="6.5"/>
+            <ellipse cx="0" cy="-6" rx="4" ry="6.5" transform="rotate(72)"/>
+            <ellipse cx="0" cy="-6" rx="4" ry="6.5" transform="rotate(144)"/>
+            <ellipse cx="0" cy="-6" rx="4" ry="6.5" transform="rotate(216)"/>
+            <ellipse cx="0" cy="-6" rx="4" ry="6.5" transform="rotate(288)"/>
+          </g>
+          <circle cx="20" cy="24" r="3" fill="#F6B9CF"/>
+        </svg>
+        <span class="logo-text">PeriodPal</span>
+      </a>
+
+      <!-- Menu button: only visible on small screens -->
+      <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span class="menu-toggle-bars" aria-hidden="true"></span>
+        <span id="menu-toggle-label">Menu</span>
+      </button>
+
+      <nav class="site-nav" id="site-nav" aria-label="Main">
+        <ul class="nav-links">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#track">Track Period</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+        <a class="button button-primary" href="#track" data-focus-form>Track My Period</a>
+      </nav>
+
+    </div>
+  </header>
+
+  <main id="main-content">
+
+    <!-- ============ B. HERO ============ -->
+    <section class="hero" id="home" aria-labelledby="hero-heading">
+      <div class="container hero-grid">
+
+        <div class="hero-text">
+          <h1 id="hero-heading">Understand Your Cycle, Feel More Prepared</h1>
+          <p class="hero-subtitle">A simple and private way to record your period dates and learn about your cycle.</p>
+
+          <div class="hero-actions">
+            <a class="button button-primary" href="#track" data-focus-form>Start Tracking</a>
+            <a class="text-link" href="#learn">Learn More</a>
+          </div>
+
+          <p class="privacy-note">
+            <svg class="privacy-note-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M7 10V8a5 5 0 0 1 10 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1Zm2 0h6V8a3 3 0 0 0-6 0v2Z" fill="currentColor"/>
+            </svg>
+            Your health information deserves privacy.
+          </p>
+        </div>
+
+        <!-- Decorative picture: a calendar page with a flower. It shows no real data. -->
+        <div class="hero-visual" aria-hidden="true">
+          <svg class="hero-illustration" viewBox="0 0 360 340" focusable="false">
+            <circle cx="70" cy="64" r="58" fill="#EDE9FE"/>
+            <circle cx="302" cy="292" r="46" fill="#FCE7EF"/>
+
+            <g class="calendar-art">
+              <rect x="50" y="50" width="250" height="250" rx="28" fill="#FFFFFF"/>
+              <!-- lavender header band -->
+              <path d="M50 112V78A28 28 0 0 1 78 50H272A28 28 0 0 1 300 78V112Z" fill="#EDE9FE"/>
+              <!-- the two calendar rings -->
+              <rect x="106" y="36" width="14" height="34" rx="7" fill="#59364F"/>
+              <rect x="230" y="36" width="14" height="34" rx="7" fill="#59364F"/>
+
+              <!-- Rows of day dots. Trick: a thick line with round ends and a dash pattern
+                   of "0 32" draws one round dot every 32 pixels. -->
+              <g stroke-width="22" stroke-linecap="round" stroke-dasharray="0 32" fill="none">
+                <path d="M80 142H272" stroke="#F6EFE6"/>
+                <path d="M80 182H272" stroke="#F6EFE6"/>
+                <path d="M80 222H272" stroke="#F6EFE6"/>
+                <path d="M80 262H272" stroke="#F6EFE6"/>
+                <!-- a few soft pink dots, purely decorative -->
+                <path d="M144 182H240" stroke="#F6B9CF"/>
+                <path d="M80 222H112" stroke="#EDE9FE"/>
+              </g>
+            </g>
+
+            <!-- little flower on the corner of the calendar -->
+            <g transform="translate(66 282)">
+              <g fill="#F6B9CF">
+                <ellipse cx="0" cy="-26" rx="15" ry="24"/>
+                <ellipse cx="0" cy="-26" rx="15" ry="24" transform="rotate(72)"/>
+                <ellipse cx="0" cy="-26" rx="15" ry="24" transform="rotate(144)"/>
+                <ellipse cx="0" cy="-26" rx="15" ry="24" transform="rotate(216)"/>
+                <ellipse cx="0" cy="-26" rx="15" ry="24" transform="rotate(288)"/>
+              </g>
+              <circle r="11" fill="#59364F"/>
+            </g>
+          </svg>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============ C. PERIOD-ENTRY FORM ============ -->
+    <section class="section section-lavender" id="track" aria-labelledby="track-heading">
+      <div class="container">
+        <div class="form-card">
+          <h2 id="track-heading">Record Your Period</h2>
+          <p class="form-intro">Choose the first and last day of your period. You can record more than one period, and everything below updates each time.</p>
+
+          <!-- Shown only when the browser can't save, or saved data had a problem -->
+          <div class="message message-warning" id="storage-notice" role="status"></div>
+
+          <!-- "novalidate" turns off the browser's own pop-up errors so our friendlier messages show instead -->
+          <form id="period-form" novalidate>
+
+            <!-- Shown only while a record is being edited -->
+            <div class="message message-info" id="editing-notice" role="status"></div>
+
+            <div class="field">
+              <label for="start-date">Period start date <span class="field-tag">(required)</span></label>
+              <input class="field-input" type="date" id="start-date" name="start-date" required
+                     min="2000-01-01" aria-describedby="start-date-hint start-date-error">
+              <p class="field-hint" id="start-date-hint">The first day of bleeding.</p>
+              <p class="field-error" id="start-date-error"></p>
+            </div>
+
+            <div class="field">
+              <label for="end-date">Period end date <span class="field-tag">(required)</span></label>
+              <input class="field-input" type="date" id="end-date" name="end-date" required
+                     min="2000-01-01" aria-describedby="end-date-hint end-date-error">
+              <p class="field-hint" id="end-date-hint">The last day of bleeding.</p>
+              <p class="field-error" id="end-date-error"></p>
+            </div>
+
+            <div class="field">
+              <label for="period-notes">Notes <span class="field-tag">(optional)</span></label>
+              <textarea class="field-input" id="period-notes" name="period-notes" rows="3" maxlength="300"
+                        aria-describedby="period-notes-hint"></textarea>
+              <p class="field-hint" id="period-notes-hint">Up to 300 characters. Notes are not saved: PeriodPal only keeps your start and end dates, so notes are cleared once you save.</p>
+            </div>
+
+            <div class="form-actions">
+              <button class="button button-primary button-wide" type="submit" id="save-period-button">Save Period Dates</button>
+              <button class="button button-secondary button-wide" type="button" id="cancel-edit-button" hidden>Cancel Editing</button>
+            </div>
+
+            <!-- Screen readers announce these automatically when text appears inside them -->
+            <div class="message message-error" id="form-error-summary" role="alert"></div>
+            <div class="message message-success" id="form-success" role="status"></div>
+
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DASHBOARD: CYCLE SUMMARY (Stage 2) ============ -->
+    <section class="section" id="results" aria-labelledby="results-heading">
+      <div class="container">
+        <h2 class="section-heading" id="results-heading">Your cycle summary</h2>
+        <p class="section-intro">These results use only the periods you have recorded in this browser. A cycle is counted from the first day of one period to the first day of the next.</p>
+
+        <div class="card-grid dashboard-grid">
+
+          <article class="info-card stat-card" aria-labelledby="stat-latest-title">
+            <div class="info-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path fill-rule="evenodd" d="M7 2h2v2h6V2h2v2h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V2ZM5 10v10h14V10H5Z" fill="currentColor"/></svg>
+            </div>
+            <h3 id="stat-latest-title">Most recent period start</h3>
+            <p class="stat-value is-empty" id="stat-latest-value">Not yet available</p>
+            <div class="stat-detail" id="stat-latest-detail"><p>Record a period above to see it here.</p></div>
+          </article>
+
+          <article class="info-card stat-card" aria-labelledby="stat-duration-title">
+            <div class="info-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M12 2.5c3.5 4.2 6 7.4 6 10.5a6 6 0 0 1-12 0c0-3.1 2.5-6.3 6-10.5Z" fill="currentColor"/></svg>
+            </div>
+            <h3 id="stat-duration-title">Most recent bleeding duration</h3>
+            <p class="stat-value is-empty" id="stat-duration-value">Not yet available</p>
+            <div class="stat-detail" id="stat-duration-detail"><p>Record a period above to see it here.</p></div>
+          </article>
+
+          <article class="info-card stat-card" aria-labelledby="stat-average-title">
+            <div class="info-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4v6h-6"/><path d="M20 15a9 9 0 1 1-2.1-9.4L21 10"/></g></svg>
+            </div>
+            <h3 id="stat-average-title">Average cycle length</h3>
+            <p class="stat-value is-empty" id="stat-average-value">Not enough data yet</p>
+            <div class="stat-detail" id="stat-average-detail"><p>Record at least two periods. A cycle needs two different start dates.</p></div>
+          </article>
+
+          <article class="info-card stat-card" aria-labelledby="stat-next-title">
+            <div class="info-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1 5h2v4.6l3.2 1.9-1 1.7L11 12.4V7Z" fill="currentColor"/></svg>
+            </div>
+            <div class="stat-card-header">
+              <h3 id="stat-next-title">Estimated next period start</h3>
+              <span class="estimate-badge">Estimate</span>
+            </div>
+            <p class="stat-value is-empty" id="stat-next-value">Not enough data yet</p>
+            <div class="stat-detail" id="stat-next-detail"><p>Record a period above to get started.</p></div>
+
+            <!-- Only shown while exactly one period is recorded -->
+            <form class="typical-cycle-form" id="typical-cycle-form" novalidate hidden>
+              <div class="field">
+                <label for="typical-cycle-length">Typical cycle length in days <span class="field-tag">(optional)</span></label>
+                <input class="field-input" type="number" id="typical-cycle-length" name="typical-cycle-length"
+                       inputmode="numeric" min="15" max="90" step="1" aria-describedby="typical-cycle-hint typical-cycle-error">
+                <p class="field-hint" id="typical-cycle-hint">Only used until you record a second period. Then PeriodPal uses your own dates.</p>
+                <p class="field-error" id="typical-cycle-error"></p>
+              </div>
+              <button type="submit" class="button button-secondary">Use this length</button>
+              <p class="typical-cycle-status" id="typical-cycle-status" role="status"></p>
+            </form>
+          </article>
+
+        </div>
+
+        <p class="disclaimer" role="note">Every future date on this page is an estimate, not a guaranteed date. Real cycles vary, so your next period may start earlier or later than estimated.</p>
+      </div>
+    </section>
+
+    <!-- ============ CALENDAR (Stage 3) ============ -->
+    <section class="section section-lavender" id="calendar" aria-labelledby="calendar-heading">
+      <div class="container">
+        <h2 class="section-heading" id="calendar-heading">Calendar</h2>
+        <p class="section-intro">Browse month by month. The calendar updates as soon as you add, edit or delete a record.</p>
+
+        <div class="panel calendar-panel">
+          <div class="calendar-toolbar">
+            <button type="button" class="button button-secondary" id="calendar-prev">
+              <span aria-hidden="true">&lsaquo;</span><span class="button-text"> Previous month</span>
+            </button>
+            <h3 class="calendar-month" id="calendar-month-label" aria-live="polite"></h3>
+            <button type="button" class="button button-secondary" id="calendar-next">
+              <span class="button-text">Next month </span><span aria-hidden="true">&rsaquo;</span>
+            </button>
+          </div>
+          <p class="calendar-today-row"><button type="button" class="text-link" id="calendar-today">Go to this month</button></p>
+
+          <table class="calendar" id="calendar-table">
+            <caption class="sr-only" id="calendar-caption"></caption>
+            <thead>
+              <tr>
+                <th scope="col"><abbr title="Sunday">Sun</abbr></th>
+                <th scope="col"><abbr title="Monday">Mon</abbr></th>
+                <th scope="col"><abbr title="Tuesday">Tue</abbr></th>
+                <th scope="col"><abbr title="Wednesday">Wed</abbr></th>
+                <th scope="col"><abbr title="Thursday">Thu</abbr></th>
+                <th scope="col"><abbr title="Friday">Fri</abbr></th>
+                <th scope="col"><abbr title="Saturday">Sat</abbr></th>
+              </tr>
+            </thead>
+            <tbody id="calendar-body"></tbody>
+          </table>
+
+          <ul class="calendar-legend" aria-label="Calendar key">
+            <li><span class="legend-swatch swatch-period"></span> Recorded period day</li>
+            <li><span class="legend-swatch swatch-start"></span> First day of a recorded period</li>
+            <li><span class="legend-swatch swatch-today"></span> Today</li>
+            <li><span class="legend-swatch swatch-estimated"></span> Estimated next start</li>
+            <li><span class="legend-swatch swatch-range"></span> Possible range (estimate)</li>
+          </ul>
+          <p class="calendar-note">Estimated dates are estimates, not guaranteed dates.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PERIOD HISTORY (Stage 3) ============ -->
+    <section class="section section-blush" id="history" aria-labelledby="history-heading">
+      <div class="container">
+        <h2 class="section-heading" id="history-heading">Period history</h2>
+        <p class="section-intro">Your recorded periods, oldest first. Cycle length is the number of days from a period's first day to the first day of the next recorded period.</p>
+
+        <div class="panel history-panel">
+          <p class="status-line" id="history-status" role="status" tabindex="-1"></p>
+
+          <p class="history-empty" id="history-empty">No periods recorded yet. Record your first period above and it will appear here.</p>
+
+          <table class="history-table" id="history-table" hidden>
+            <caption class="sr-only">Recorded periods, oldest first</caption>
+            <thead>
+              <tr>
+                <th scope="col">First day</th>
+                <th scope="col">Last day</th>
+                <th scope="col">Bleeding days</th>
+                <th scope="col">Cycle length</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+          </table>
+
+          <div class="data-controls">
+            <h3 id="data-heading">Your data on this device</h3>
+            <p>Your records are saved in this browser on this device using local storage. PeriodPal does not send them anywhere. Local storage is not encrypted health-data storage, so anyone who can use this browser on this device may be able to see your records. Clearing your browser's site data or history may also erase them.</p>
+            <button type="button" class="button button-danger" id="clear-all-button">Clear All Data</button>
+            <p class="status-line" id="data-status" role="status"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ D. INFORMATION CARDS ============ -->
+    <section class="section" id="learn" aria-labelledby="learn-heading">
+      <div class="container">
+        <h2 class="section-heading" id="learn-heading">Good to know before you begin</h2>
+
+        <div class="card-grid">
+
+          <article class="info-card">
+            <div class="info-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1V3a1 1 0 0 1 1-1Zm13 8H4v9h16v-9Z" fill="currentColor"/></svg>
+            </div>
+            <h3>Record Your Dates</h3>
+            <p>Enter the day your period started and the day it ended. You can edit or delete a record at any time.</p>
+          </article>
+
+          <article class="info-card">
+            <div class="info-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4v6h-6"/><path d="M20 15a9 9 0 1 1-2.1-9.4L21 10"/></g></svg>
+            </div>
+            <h3>Understand Your Cycle</h3>
+            <p>Cycle length is measured from the first day of one period to the first day of the next. Cycles vary from person to person.</p>
+          </article>
+
+          <article class="info-card" id="privacy">
+            <div class="info-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3Zm-1 13-3-3 1.400-1.400L11 12.2l3.6-3.6L16 10l-5 5Z" fill="currentColor"/></svg>
+            </div>
+            <h3>Privacy First</h3>
+            <p>PeriodPal does not send your information anywhere. Your records are saved in this browser on this device using local storage, which is not encrypted. Anyone who can use this browser may be able to see them, and clearing your browser data can erase them.</p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ E. ABOUT ============ -->
+    <section class="section section-blush" id="about" aria-labelledby="about-heading">
+      <div class="container about-content">
+        <h2 id="about-heading">About PeriodPal</h2>
+        <p>PeriodPal is designed to help you record menstrual dates and become more aware of your own cycle patterns. This early version saves your records in this browser, works out your cycle lengths, shows a calendar and history, and gives an estimated next start date.</p>
+        <p class="disclaimer" role="note">PeriodPal provides date-recording tools and educational information, not medical advice. Menstrual cycles vary, and future dates cannot be predicted with certainty.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ F. FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <p class="footer-logo">PeriodPal</p>
+        <p class="footer-copy">&copy; <span id="current-year"></span> PeriodPal. All rights reserved.</p>
+      </div>
+
+      <nav aria-label="Footer">
+        <ul class="footer-links">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#privacy">Privacy</a></li>
+        </ul>
+      </nav>
+
+      <p class="footer-disclaimer">PeriodPal offers date-recording tools and general educational information only. It does not provide medical advice, diagnosis or treatment. Please speak to a qualified health professional about any health concern.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

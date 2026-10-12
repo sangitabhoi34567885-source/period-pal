@@ -1,0 +1,416 @@
+/*
+  style.css — PeriodPal, Stage 1
+
+  How this file is organised:
+    1. Variables (colours, sizes) — change the look here
+    2. Base styles
+    3. Buttons and links
+    4. Header and navigation
+    5. Hero
+    6. Sections, form and messages
+    7. Information cards, dashboard cards, calendar, history, about, footer
+    8. Larger screens (tablet/desktop rules)
+    9. Reduced-motion preference
+
+  We write the SMALL-SCREEN styles first, then add rules for bigger screens
+  inside "@media (min-width: ...)" blocks. This is called "mobile-first".
+*/
+
+/* ---------- 1. Variables ---------- */
+:root {
+  /* Your palette */
+  --color-blush: #FCE7EF;
+  --color-lavender: #EDE9FE;
+  --color-cream: #FFF9F4;
+  --color-plum: #59364F;
+
+  /* Supporting colours (chosen for readable contrast) */
+  --color-plum-soft: #6B4961;      /* quieter text */
+  --color-pink: #F4A6C0;           /* primary button */
+  --color-pink-hover: #F19AB7;
+  --color-pink-light: #F6B9CF;
+  --color-field-border: #8F6F86;
+  --color-card-border: #F0E3EA;
+  --color-error: #9F1C47;
+  --color-error-bg: #FFF1F5;
+  --color-success: #1F6B4A;
+  --color-success-bg: #EDF8F1;
+
+  --shadow-card: 0 10px 30px rgba(89, 54, 79, 0.08);
+  --shadow-card-hover: 0 16px 36px rgba(89, 54, 79, 0.14);
+  --radius-card: 24px;
+  --radius-field: 14px;
+  --transition: 200ms ease;
+
+  /* Fonts already installed on the visitor's device, so nothing is downloaded */
+  --font-heading: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---------- 2. Base styles ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--color-plum);
+  background: var(--color-cream);
+  overflow-wrap: break-word;   /* long words wrap instead of causing sideways scrolling */
+}
+
+h1, h2, h3 { font-family: var(--font-heading); line-height: 1.2; margin: 0 0 0.75rem; }
+h1 { font-size: clamp(2rem, 7vw, 3.25rem); letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.6rem, 4.5vw, 2.1rem); }
+h3 { font-size: 1.3rem; }
+
+p { margin: 0 0 1rem; }
+ul { margin: 0; padding: 0; list-style: none; }
+svg { display: block; max-width: 100%; }
+
+.container { width: min(1120px, 100% - 2.5rem); margin-inline: auto; }
+
+/* Text that is hidden visually but still read aloud by screen readers */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* The "hidden" attribute must always win. Without this, rules like ".button { display: inline-flex }"
+   would keep a "hidden" button on screen. */
+[hidden] { display: none !important; }
+
+/* Keep anchored sections from hiding under the sticky header */
+[id] { scroll-margin-top: 5.5rem; }
+
+/* Visible focus ring for keyboard users */
+:focus-visible { outline: 3px solid var(--color-plum); outline-offset: 3px; border-radius: 6px; }
+
+.skip-link {
+  position: absolute; left: 1rem; top: -4rem; z-index: 100;
+  background: var(--color-plum); color: var(--color-cream);
+  padding: 0.7rem 1.1rem; border-radius: 999px;
+}
+.skip-link:focus { top: 1rem; }
+
+/* Smooth scrolling only for people who haven't asked for less motion */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* ---------- 3. Buttons and links ---------- */
+.button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 3rem; padding: 0.7rem 1.6rem;
+  font: inherit; font-weight: 700; text-decoration: none; cursor: pointer;
+  border: 2px solid transparent; border-radius: 999px;
+  transition: background-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+.button-primary { background: var(--color-pink); color: var(--color-plum); box-shadow: 0 4px 12px rgba(244, 166, 192, 0.45); }
+.button-primary:hover { background: var(--color-pink-hover); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(244, 166, 192, 0.55); }
+.button-secondary { background: var(--color-lavender); color: var(--color-plum); border-color: var(--color-field-border); }
+.button-secondary:hover { background: #E0D9FB; transform: translateY(-2px); }
+.button-danger { background: #FFFFFF; color: var(--color-error); border-color: var(--color-error); }
+.button-danger:hover { background: var(--color-error-bg); }
+.button-small { min-height: 2.75rem; padding: 0.4rem 1rem; font-size: 0.95rem; }
+.button-wide { width: 100%; }
+
+.text-link {
+  display: inline-flex; align-items: center; min-height: 3rem; padding: 0 0.25rem;
+  font-weight: 600; color: var(--color-plum);
+  text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 2px;
+  transition: text-decoration-color var(--transition);
+}
+.text-link:hover { text-decoration-color: var(--color-pink); }
+
+/* ---------- 4. Header and navigation ---------- */
+.site-header {
+  position: sticky; top: 0; z-index: 50;    /* stays at the top while scrolling */
+  background: rgba(255, 249, 244, 0.96);
+  border-bottom: 1px solid var(--color-card-border);
+}
+.header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4.5rem; }
+
+.logo { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; color: var(--color-plum); }
+.logo-icon { width: 2.4rem; height: 2.4rem; }
+.logo-text { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; }
+
+.menu-toggle { display: none; }   /* hidden until JavaScript confirms it can run the menu */
+
+.site-nav { display: flex; flex-direction: column; gap: 1rem; }
+.nav-links { display: flex; flex-direction: column; gap: 0.25rem; }
+.nav-links a {
+  display: flex; align-items: center; min-height: 3rem; padding: 0 1rem;
+  border-radius: 999px; text-decoration: none; font-weight: 600; color: var(--color-plum);
+  transition: background-color var(--transition);
+}
+.nav-links a:hover { background: var(--color-lavender); }
+
+/* If JavaScript is on, small screens get a dropdown menu */
+.js-enabled .menu-toggle {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  min-height: 3rem; padding: 0 1.1rem;
+  font: inherit; font-weight: 600; color: var(--color-plum);
+  background: var(--color-lavender); border: 2px solid var(--color-field-border); border-radius: 999px; cursor: pointer;
+}
+.menu-toggle-bars, .menu-toggle-bars::before, .menu-toggle-bars::after {
+  display: block; width: 1.1rem; height: 2px; background: currentColor; border-radius: 2px;
+}
+.menu-toggle-bars { position: relative; }
+.menu-toggle-bars::before, .menu-toggle-bars::after { content: ""; position: absolute; left: 0; }
+.menu-toggle-bars::before { top: -6px; }
+.menu-toggle-bars::after { top: 6px; }
+
+.js-enabled .site-nav {
+  display: none; position: absolute; top: 100%; left: 0; right: 0;
+  padding: 1rem 1.25rem 1.5rem;
+  background: var(--color-cream); border-bottom: 1px solid var(--color-card-border);
+  box-shadow: 0 14px 24px rgba(89, 54, 79, 0.1);
+}
+.js-enabled .site-nav.is-open { display: flex; }
+
+/* ---------- 5. Hero ---------- */
+.hero { position: relative; overflow: hidden; padding: 2.5rem 0 3rem; }
+.hero::before {                       /* big soft blush circle behind the hero */
+  content: ""; position: absolute; top: -9rem; right: -8rem; z-index: 0;
+  width: 26rem; height: 26rem; border-radius: 50%; background: var(--color-blush);
+}
+.hero-grid { position: relative; z-index: 1; display: grid; gap: 2rem; }
+.hero-subtitle { font-size: 1.2rem; color: var(--color-plum-soft); max-width: 36rem; }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; margin: 1.75rem 0; }
+.privacy-note { display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 0.95rem; color: var(--color-plum-soft); }
+.privacy-note-icon { flex: none; width: 1.25rem; height: 1.25rem; }
+
+.hero-visual { display: flex; justify-content: center; }
+.hero-illustration { width: 100%; max-width: 20rem; height: auto; }
+.calendar-art { filter: drop-shadow(0 12px 22px rgba(89, 54, 79, 0.16)); }
+
+/* ---------- 6. Sections, form and messages ---------- */
+.section { padding: 3.5rem 0; }
+.section-lavender { background: var(--color-lavender); }
+.section-blush { background: var(--color-blush); }
+.section-heading { text-align: center; margin-bottom: 2rem; }
+.section-heading + .section-intro { margin: -1rem auto 2rem; max-width: 40rem; text-align: center; color: var(--color-plum-soft); }
+
+.form-card, .panel {
+  padding: 1.5rem;
+  background: #FFFFFF; border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-card); box-shadow: var(--shadow-card);
+}
+.form-card { max-width: 38rem; margin-inline: auto; }
+.form-actions { display: grid; gap: 0.75rem; }
+.form-intro { color: var(--color-plum-soft); }
+
+.field { margin-bottom: 1.4rem; min-width: 0; }
+.field label { display: block; margin-bottom: 0.4rem; font-weight: 700; }
+.field-tag { font-weight: 400; font-size: 0.9rem; color: var(--color-plum-soft); }
+.field-hint { margin: 0.4rem 0 0; font-size: 0.9rem; color: var(--color-plum-soft); }
+
+.field-input {
+  display: block; width: 100%; min-width: 0; min-height: 3rem; padding: 0.7rem 0.9rem;
+  font: inherit; color: var(--color-plum); background: #FFFFFF;
+  border: 2px solid var(--color-field-border); border-radius: var(--radius-field);
+  transition: border-color var(--transition), background-color var(--transition);
+}
+.field-input:hover { border-color: var(--color-plum); }
+textarea.field-input { min-height: 6.5rem; resize: vertical; }
+.field-input[aria-invalid="true"] { border-color: var(--color-error); background: var(--color-error-bg); }
+
+/* Error under a field: red text PLUS an icon PLUS words, so colour is never the only clue */
+.field-error {
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  margin: 0.5rem 0 0; font-size: 0.95rem; font-weight: 600; color: var(--color-error);
+}
+.field-error:empty { display: none; }
+.field-error-icon {
+  flex: none; display: grid; place-items: center; width: 1.3rem; height: 1.3rem; margin-top: 0.1rem;
+  border-radius: 50%; background: var(--color-error); color: #FFFFFF; font-size: 0.8rem; font-weight: 700;
+}
+
+.message { margin-top: 1.25rem; padding: 1rem 1.1rem; border-radius: var(--radius-field); border-left: 6px solid; }
+.message:empty { display: none; }
+.message p { margin: 0 0 0.5rem; }
+.message p:last-child { margin-bottom: 0; }
+.message ul { margin: 0.5rem 0 0; padding-left: 1.2rem; list-style: disc; }
+.message-error { color: #7A1237; background: var(--color-error-bg); border-color: var(--color-error); }
+.message-success { color: #14472F; background: var(--color-success-bg); border-color: var(--color-success); }
+.message-warning { color: var(--color-plum); background: var(--color-blush); border-color: var(--color-plum); }
+.message-info { color: var(--color-plum); background: var(--color-lavender); border-color: var(--color-field-border); }
+.message a { color: inherit; font-weight: 700; text-underline-offset: 4px; }
+
+/* ---------- 7. Information cards, about, footer ---------- */
+.card-grid { display: grid; gap: 1.5rem; }
+.info-card {
+  padding: 1.75rem; background: #FFFFFF; border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-card); box-shadow: var(--shadow-card);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.info-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card-hover); }
+.info-card p { margin: 0; color: var(--color-plum-soft); }
+.info-card-icon {
+  display: grid; place-items: center; width: 3.25rem; height: 3.25rem; margin-bottom: 1rem;
+  border-radius: 16px; background: var(--color-blush); color: var(--color-plum);
+}
+.info-card-icon svg { width: 1.6rem; height: 1.6rem; }
+
+/* Dashboard cards. They reuse .info-card, so we write ".info-card .xxx" to win over ".info-card p". */
+.stat-card h3 { margin-bottom: 0.4rem; font-family: var(--font-body); font-size: 1.05rem; font-weight: 700; }
+.stat-card-header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.6rem; margin-bottom: 0.4rem; }
+.stat-card-header h3 { margin: 0; }
+.estimate-badge {
+  display: inline-block; padding: 0.1rem 0.7rem;
+  background: var(--color-lavender); border: 1px solid var(--color-field-border); border-radius: 999px;
+  font-size: 0.82rem; font-weight: 700; color: var(--color-plum);
+}
+.info-card .stat-value { margin: 0 0 0.6rem; font-family: var(--font-heading); font-size: 1.9rem; font-weight: 600; line-height: 1.2; color: var(--color-plum); }
+.info-card .stat-value.is-empty { font-family: var(--font-body); font-size: 1.15rem; font-weight: 600; color: var(--color-plum-soft); }
+.stat-detail p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.stat-detail p:last-child { margin-bottom: 0; }
+.stat-detail .detail-warning { color: var(--color-plum); font-weight: 600; }
+
+.typical-cycle-form { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--color-card-border); }
+.typical-cycle-form .field { margin-bottom: 1rem; }
+.typical-cycle-form .field-input { max-width: 10rem; }
+.typical-cycle-status { margin: 0.9rem 0 0; font-size: 0.95rem; font-weight: 600; color: var(--color-success); }
+.typical-cycle-status:empty { display: none; }
+
+.about-content { max-width: 44rem; }
+.disclaimer {
+  margin: 1.5rem 0 0; padding: 1.1rem 1.25rem;
+  background: #FFFFFF; border-left: 6px solid var(--color-plum); border-radius: var(--radius-field);
+}
+
+.site-footer { padding: 2.5rem 0; background: var(--color-plum); color: var(--color-cream); font-size: 0.95rem; }
+.footer-grid { display: grid; gap: 1.5rem; }
+.footer-logo { margin: 0 0 0.25rem; font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; }
+.footer-copy, .footer-disclaimer { margin: 0; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+.footer-links a { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--color-blush); text-underline-offset: 4px; }
+.footer-links a:hover { color: #FFFFFF; }
+.site-footer :focus-visible { outline-color: var(--color-blush); }
+
+/* ----- Calendar ----- */
+.calendar-panel { max-width: 42rem; margin-inline: auto; padding: 1rem; }
+.calendar-toolbar { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem; }
+.calendar-toolbar .button { min-width: 3rem; padding-inline: 0.9rem; font-size: 1.1rem; }
+.calendar-month { margin: 0; text-align: center; font-size: 1.2rem; }
+/* On small screens only the arrows show; the words stay available to screen readers */
+.calendar-toolbar .button-text {
+  position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.calendar-today-row { margin: 0.25rem 0 0.75rem; text-align: center; }
+.calendar-today-row .text-link { font: inherit; font-weight: 600; background: none; border: 0; cursor: pointer; }
+
+.calendar { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 3px; }
+.calendar th { padding: 0.35rem 0; font-size: 0.8rem; font-weight: 700; text-align: center; color: var(--color-plum-soft); }
+.calendar abbr { text-decoration: none; }
+.calendar td {
+  position: relative; height: 2.9rem; padding: 0; text-align: center; vertical-align: middle;
+  font-size: 0.95rem; background: var(--color-cream);
+  border: 2px solid transparent; border-radius: 10px;
+}
+.calendar td.is-empty { background: transparent; }
+.calendar td.is-period { background: var(--color-pink-light); }
+.calendar td.is-period-start { background: var(--color-pink); font-weight: 700; }
+.calendar td.is-period-start::after {      /* a dot, so the first day is not shown by colour alone */
+  content: ""; position: absolute; bottom: 4px; left: 50%; width: 6px; height: 6px;
+  margin-left: -3px; border-radius: 50%; background: var(--color-plum);
+}
+.calendar td.is-estimated-range {          /* diagonal stripes: a pattern, not just a colour */
+  background: repeating-linear-gradient(135deg, var(--color-lavender) 0 6px, #F7F4FF 6px 12px);
+}
+.calendar td.is-estimated-date { background: var(--color-lavender); border: 2px dashed var(--color-plum); font-weight: 700; }
+.calendar td.is-today { box-shadow: inset 0 0 0 3px var(--color-plum); font-weight: 700; }
+
+.calendar-legend { display: grid; gap: 0.5rem; margin: 1rem 0 0; font-size: 0.95rem; color: var(--color-plum-soft); }
+.calendar-legend li { display: flex; align-items: center; gap: 0.6rem; }
+.legend-swatch {
+  position: relative; flex: none; width: 1.4rem; height: 1.4rem; border-radius: 6px;
+  background: var(--color-cream); border: 2px solid transparent; box-shadow: 0 0 0 1px var(--color-card-border);
+}
+.swatch-period { background: var(--color-pink-light); }
+.swatch-start { background: var(--color-pink); }
+.swatch-start::after {
+  content: ""; position: absolute; bottom: 2px; left: 50%; width: 5px; height: 5px;
+  margin-left: -2.5px; border-radius: 50%; background: var(--color-plum);
+}
+.swatch-today { box-shadow: inset 0 0 0 3px var(--color-plum); }
+.swatch-estimated { background: var(--color-lavender); border: 2px dashed var(--color-plum); box-shadow: none; }
+.swatch-range { background: repeating-linear-gradient(135deg, var(--color-lavender) 0 5px, #F7F4FF 5px 10px); }
+.calendar-note { margin: 0.75rem 0 0; font-size: 0.9rem; color: var(--color-plum-soft); }
+
+/* ----- History ----- */
+.status-line { margin: 0 0 1rem; font-weight: 600; color: var(--color-success); }
+.status-line:empty { display: none; }
+.history-empty { margin: 0; padding: 1.25rem; background: var(--color-cream); border-radius: var(--radius-field); color: var(--color-plum-soft); }
+.history-table { width: 100%; border-collapse: collapse; }
+.history-table th, .history-table td { padding: 0.8rem 0.6rem; text-align: left; border-bottom: 1px solid var(--color-card-border); }
+.history-table th { font-size: 0.9rem; color: var(--color-plum-soft); }
+.history-table tr.is-editing td { background: var(--color-lavender); }
+.editing-tag {
+  display: inline-block; margin-left: 0.5rem; padding: 0 0.55rem;
+  border: 1px solid var(--color-field-border); border-radius: 999px; font-size: 0.8rem; font-weight: 700;
+}
+.row-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.data-controls { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--color-card-border); }
+.data-controls h3 { font-family: var(--font-body); font-size: 1.05rem; font-weight: 700; }
+.data-controls p { color: var(--color-plum-soft); }
+.data-controls .status-line { margin: 1rem 0 0; }
+
+/* On phones, each history row becomes its own small card */
+@media (max-width: 640px) {
+  .history-table thead { position: absolute; left: -9999px; }   /* hidden visually, labels repeat in each row */
+  .history-table, .history-table tbody, .history-table tr, .history-table td { display: block; width: 100%; }
+  .history-table tr { margin-bottom: 0.9rem; padding: 0.75rem 1rem; background: var(--color-cream); border-radius: var(--radius-field); }
+  .history-table td { display: flex; justify-content: space-between; gap: 1rem; padding: 0.3rem 0; border: 0; }
+  .history-table td::before { content: attr(data-label); flex: none; color: var(--color-plum-soft); font-size: 0.95rem; }
+  .history-table tr.is-editing { background: var(--color-lavender); }
+  .history-table tr.is-editing td { background: none; }
+  .history-table td.cell-actions { justify-content: flex-start; padding-top: 0.6rem; }
+  .history-table td.cell-actions::before { display: none; }
+}
+
+/* ---------- 8. Larger screens ---------- */
+
+/* Large phones and small tablets */
+@media (min-width: 481px) {
+  .form-card, .panel { padding: 2rem; }
+  .hero-illustration { max-width: 24rem; }
+  .calendar-toolbar .button-text { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; white-space: normal; }
+  .calendar-legend { grid-template-columns: repeat(2, 1fr); }
+  .calendar td { height: 3.4rem; }
+}
+
+/* Laptops and desktops */
+@media (min-width: 769px) {
+  .header-inner { min-height: 5rem; }
+
+  /* Menu becomes a normal row of links; the button disappears */
+  .js-enabled .menu-toggle { display: none; }
+  .site-nav, .js-enabled .site-nav {
+    display: flex; position: static; flex-direction: row; align-items: center; gap: 1rem;
+    padding: 0; background: none; border: 0; box-shadow: none;
+  }
+  .nav-links { flex-direction: row; gap: 0.25rem; }
+
+  .hero { padding: 4.5rem 0 5rem; }
+  .hero-grid { grid-template-columns: 1.1fr 0.9fr; align-items: center; gap: 3rem; }
+  .hero-illustration { max-width: 26rem; }
+
+  .section { padding: 5rem 0; }
+  .form-card, .panel { padding: 2.5rem; }
+  .calendar td { height: 3.6rem; }
+
+  .card-grid { grid-template-columns: repeat(3, 1fr); }
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); align-items: start; }
+  .footer-grid { grid-template-columns: 1fr auto; align-items: start; }
+  .footer-disclaimer { grid-column: 1 / -1; max-width: 46rem; }
+}
+
+/* ---------- 9. Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+  .button-primary:hover, .button-secondary:hover, .info-card:hover { transform: none; }
+}
